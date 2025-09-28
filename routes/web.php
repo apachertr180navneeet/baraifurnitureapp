@@ -10,7 +10,8 @@ use App\Http\Controllers\Admin\AdminUserController;
 use App\Http\Controllers\Admin\{
     CustomerController,
     CategoryController,
-    ProductController
+    ProductController,
+    OrderController
 };
 
 /*
@@ -56,7 +57,7 @@ Route::name('admin.')->prefix('admin')->group(function () {
 
         Route::post('profile', [AdminAuthController::class, 'updateAdminProfile'])->name('update.profile');
 
-        foreach (['customer','category','product'] as $resource) {
+        foreach (['customer','category','product','order'] as $resource) {
             Route::prefix($resource)->name("$resource.")->group(function () use ($resource) {
                 $controller = "App\Http\Controllers\Admin\\" . ucfirst($resource) . "Controller";
                 Route::get('/', [$controller, 'index'])->name('index');
