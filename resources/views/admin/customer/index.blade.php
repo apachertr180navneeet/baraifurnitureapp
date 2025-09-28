@@ -149,9 +149,9 @@
                 {
                     data: "action",
                     render: (data, type, row) => {
-                        const statusButton = row.status == 0
-                            ? `<button type="button" class="btn btn-sm btn-success" onclick="updateUserStatus(${row.id}, 1)">Activate</button>`
-                            : `<button type="button" class="btn btn-sm btn-danger" onclick="updateUserStatus(${row.id}, 0)">Deactivate</button>`;
+                        const statusButton = row.status == 'inactive'
+                            ? `<button type="button" class="btn btn-sm btn-success" onclick="updateUserStatus(${row.id}, 'active')">Activate</button>`
+                            : `<button type="button" class="btn btn-sm btn-danger" onclick="updateUserStatus(${row.id}, 'inactive')">Deactivate</button>`;
 
                         const deleteButton = `<button type="button" class="btn btn-sm btn-danger" onclick="deleteUser(${row.id})">Delete</button>`;
                         const editButton = `<button type="button" class="btn btn-sm btn-warning" onclick="editUser(${row.id})">Edit</button>`;
@@ -273,7 +273,7 @@
         // Update user status
         // ========================
         window.updateUserStatus = function(userId, status) {
-            const message = status == 1
+            const message = status == "active"
                 ? "Customer will be able to log in after activation."
                 : "Customer will not be able to log in after deactivation.";
 
