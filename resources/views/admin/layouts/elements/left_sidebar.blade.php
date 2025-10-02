@@ -30,6 +30,7 @@
 			['route' => 'admin.order.index', 'text' => 'Order'],
 			['route' => 'admin.notification.index', 'text' => 'Push Notification'],
 			['route' => 'admin.banner.index', 'text' => 'Banner Management'],
+			['route' => 'admin.customizeorders.index', 'text' => 'Customize Orders'],
 		] as $mastermenu)
 			<li class="menu-item {{ request()->routeIs($mastermenu['route']) ? 'active' : '' }}">
 				<a href="{{ route($mastermenu['route']) }}" class="menu-link">
