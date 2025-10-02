@@ -50,10 +50,13 @@ class ProductController extends Controller
             ], 422);
         }
 
+        $imageUrl = null;
+
         // Handle image upload
-        $imagePath = null;
         if ($request->hasFile('image')) {
-            $imagePath = $request->file('image')->store('products', 'public');
+            $imageName = time() . '_' . $request->file('image')->getClientOriginalName();
+            $request->file('image')->move(public_path('uploads/product'), $imageName);
+            $imageUrl = url('uploads/product/' . $imageName);
         }
 
         $product = Product::create([
@@ -61,7 +64,7 @@ class ProductController extends Controller
             'category_id' => $request->category_id,
             'price' => $request->price,
             'stock' => $request->stock,
-            'image' => $imagePath,
+            'image' => $imageUrl, // save full URL directly
         ]);
 
         // Add colors
@@ -78,6 +81,7 @@ class ProductController extends Controller
         ], 201);
     }
 
+
     // Fetch single product
     public function get($id)
     {
@@ -91,7 +95,6 @@ class ProductController extends Controller
         return response()->json($product, 200);
     }
 
-    // Update product
     public function update(Request $request)
     {
         $rules = [
@@ -122,19 +125,27 @@ class ProductController extends Controller
             ], 404);
         }
 
-        // Update image
+        // Prepare data to update
+        $data = $request->only(['name', 'category_id', 'price', 'stock']);
+
+        // Update image if a new one is uploaded
         if ($request->hasFile('image')) {
-            if ($product->image) {
-                Storage::disk('public')->delete($product->image);
+            // Delete old image if exists
+            $oldImagePath = str_replace(url('/') . '/', '', $product->image);
+            if (file_exists(public_path($oldImagePath))) {
+                unlink(public_path($oldImagePath));
             }
-            $product->image = $request->file('image')->store('products', 'public');
+
+            $imageName = time() . '_' . $request->file('image')->getClientOriginalName();
+            $request->file('image')->move(public_path('uploads/product'), $imageName);
+            $data['image'] = url('uploads/product/' . $imageName);
         }
 
-        $product->update($request->only(['name', 'category_id', 'price', 'stock', 'image']));
+        // Update product
+        $product->update($data);
 
         // Update colors
         if ($request->has('colors')) {
-            // Delete existing colors
             $product->colors()->delete();
             foreach ($request->colors as $color) {
                 $product->colors()->create($color);
@@ -147,6 +158,7 @@ class ProductController extends Controller
             'data' => $product->load('colors')
         ], 200);
     }
+
 
     // Soft delete product
     public function destroy($id)
