@@ -3,53 +3,180 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-
 use Illuminate\Http\Request;
 use App\Models\Notification;
-use App\Models\NotificationUser;
-use Carbon\Carbon;
-use Exception,Auth;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Validator;
+use Exception;
 
 class NotificationController extends Controller
 {
-    public function index(){
-        try{
-            $user = Auth::user();
-            $user_notifications = NotificationUser::where('user_id',$user->id)->pluck('notification_id')->toArray();
-            $notifications = Notification::select('*','id as uuid')->whereIn('id',$user_notifications)->orderBy('created_at', 'desc')->paginate(10);
-            return view('admin.notifications.index',compact('notifications'));
-        }catch(Exception $e){
-            return back()->withError($e->getMessage());
+    /**
+     * Show customer index page.
+     */
+    public function index(Request $request)
+    {
+        return view('admin.notifications.index');
+    }
+
+    /**
+     * Fetch all customers (role = user).
+     */
+    public function getall(Request $request)
+    {
+        $customers = Notification::orderBy('id', 'desc')
+            ->get();
+
+        return response()->json(['data' => $customers], 200);
+    }
+
+    /**
+     * Update status (active/inactive) of a customer.
+     */
+    public function status(Request $request)
+    {
+        try {
+            $notification = Notification::find($request->id);
+
+            if (!$notification) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Notification not found',
+                ], 404);
+            }
+
+            $notification->status = $request->status;
+            $notification->save();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Status updated successfully',
+            ], 200);
+
+        } catch (Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+            ], 500);
         }
     }
 
-    public function clear(){
-        try{
-            $user = Auth::user();
-            $date = Carbon::now();
-            $user_notifications = NotificationUser::where('user_id',$user->id)->where('read_at',null)->update(['read_at'=>$date]);
-            return back()->withSuccess('All notifications clear successful');
-        }catch(Exception $e){
-            return back()->withError($e->getMessage());
-        }
-    }
-
-
+    /**
+     * Delete a customer by ID.
+     */
     public function destroy($id)
     {
-        try{
-            $user = Auth::user();
-            NotificationUser::where('user_id',$user->id)->where('notification_id',$id)->delete();
+        try {
+            $customer = Notification::find($id);
+
+            if (!$customer) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Customer not found',
+                ], 404);
+            }
+
+            $customer->delete();
+
             return response()->json([
-                'status' => true,
-                'message' => 'Notification deleted successfully',
-            ]);
-        }
-        catch(Exception $e){
+                'success' => true,
+                'message' => 'Customer deleted successfully',
+            ], 200);
+
+        } catch (Exception $e) {
             return response()->json([
-                'status' => false,
+                'success' => false,
                 'message' => $e->getMessage(),
-            ]);
+            ], 500);
         }
+    }
+
+    /**
+     * Store a new notification.
+     */
+    public function store(Request $request)
+    {
+        $rules = [
+            'date'        => 'required|date',
+            'title'       => 'required|string|min:3|max:100',
+            'description' => 'required|string|max:500',
+        ];
+
+        $validator = Validator::make($request->all(), $rules);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'errors'  => $validator->errors(),
+            ], 422); // Unprocessable Entity
+        }
+
+        $notification = Notification::create([
+            'date'        => $request->date,
+            'title'       => $request->title,
+            'description' => $request->description,
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Notification saved successfully!',
+            'data'    => $notification,
+        ], 201); // Created
+    }
+
+    /**
+     * Fetch single notification by ID.
+     */
+    public function get($id)
+    {
+        $notification = Notification::find($id);
+
+        if (!$notification) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Notification not found',
+            ], 404);
+        }
+
+        return response()->json($notification, 200);
+    }
+
+    /**
+     * Update notification data.
+     */
+    public function update(Request $request)
+    {
+        $rules = [
+            'id'          => 'required|exists:notifications,id',
+            'date'        => 'required|date',
+            'title'       => 'required|string|min:3|max:100',
+            'description' => 'required|string|max:500',
+        ];
+
+        $validator = Validator::make($request->all(), $rules);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'errors'  => $validator->errors(),
+            ], 422);
+        }
+
+        $notification = Notification::find($request->id);
+
+        if (!$notification) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Notification not found',
+            ], 404);
+        }
+
+        $notification->update($request->only(['date', 'title', 'description']));
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Notification updated successfully!',
+            'data'    => $notification,
+        ], 200);
     }
 }
