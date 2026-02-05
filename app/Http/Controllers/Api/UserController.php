@@ -15,8 +15,10 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Filesystem\Filesystem;
 use App\Models\SplashScreen;
 
+use Barryvdh\DomPDF\Facade\Pdf;
 
-use PDF; // barryvdh/laravel-dompdf
+
+
 
 
 

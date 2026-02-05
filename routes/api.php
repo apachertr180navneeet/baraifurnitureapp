@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\ContactController;
 use App\Http\Controllers\Api\UserController;
+use Illuminate\Support\Facades\Artisan;
 
 
 
@@ -22,6 +23,31 @@ use App\Http\Controllers\Api\UserController;
 // Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 //     return $request->user();
 // });
+
+Route::get('/clear-cache', function () {
+
+    Artisan::call('config:clear');
+    Artisan::call('cache:clear');
+    Artisan::call('route:clear');
+    Artisan::call('view:clear');
+    Artisan::call('optimize:clear');
+
+    // If you are using Spatie Permission
+    Artisan::call('permission:cache-reset');
+
+    // Create storage symlink (safe if already exists)
+    Artisan::call('storage:link');
+
+    // Composer dump-autoload (only works if exec is enabled)
+    if (function_exists('exec')) {
+        exec('composer dump-autoload');
+    }
+
+    return response()->json([
+        'status' => true,
+        'message' => 'Config, cache, route, view, optimize cleared successfully'
+    ]);
+});
 
 Route::get('/splash-screen', [AuthController::class, 'splashScreens']);
 Route::get('/timezones', [AuthController::class, 'getTimeZones']);
