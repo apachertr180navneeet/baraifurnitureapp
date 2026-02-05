@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Validator;
 use Tymon\JWTAuth\Exceptions\JWTException;
 use Mail,Hash,File,DB,Helper,Auth;
 use App\Models\Cart;
-use App\Models\Item;
+use App\Models\Product;
 use App\Models\GenarateQuotation;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Filesystem\Filesystem;
@@ -29,7 +29,7 @@ class UserController extends Controller
 
         // Validate input
         $validator = Validator::make($request->all(), [
-            'item_id' => 'required|exists:items,id',
+            'item_id' => 'required|exists:products,id',
             'quantity' => 'required|integer|min:1',
         ]);
 
@@ -44,11 +44,11 @@ class UserController extends Controller
         $quantity = $request->quantity;
 
         // Get item details to calculate amount
-        $item = Item::find($item_id);
+        $item = Product::find($item_id);
         if (!$item) {
             return response()->json([
                 'status' => false,
-                'message' => 'Item not found',
+                'message' => 'Product not found',
             ], 200);
         }
 
