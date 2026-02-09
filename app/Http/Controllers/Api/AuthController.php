@@ -646,6 +646,7 @@ class AuthController extends Controller
             'category_name' => $product->category->name ?? "",
             'price'         => $product->price,
             'stock'         => $product->stock,
+            'description'   => $product->description ?? "",
             'image'         => $product->image,
             'status'        => $product->status,
             'created_at'    => $product->created_at,

@@ -36,6 +36,7 @@ class ProductController extends Controller
             'price' => 'required|numeric',
             'stock' => 'required|integer',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif',
+            'description' => 'nullable|string|max:1000',
             'colors' => 'nullable|array',
             'colors.*.color_name' => 'required_with:colors|string|max:255',
             'colors.*.qty' => 'required_with:colors|integer|min:0',
@@ -64,6 +65,7 @@ class ProductController extends Controller
             'category_id' => $request->category_id,
             'price' => $request->price,
             'stock' => $request->stock,
+            'description' => $request->description,
             'image' => $imageUrl, // save full URL directly
         ]);
 
@@ -103,6 +105,7 @@ class ProductController extends Controller
             'category_id' => 'required|exists:categories,id',
             'price' => 'required|numeric',
             'stock' => 'required|integer',
+            'description' => 'nullable|string|max:1000',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif',
             'colors' => 'nullable|array',
             'colors.*.color_name' => 'required_with:colors|string|max:255',
@@ -126,7 +129,7 @@ class ProductController extends Controller
         }
 
         // Prepare data to update
-        $data = $request->only(['name', 'category_id', 'price', 'stock']);
+        $data = $request->only(['name', 'category_id', 'price', 'stock','description']);
 
         // Update image if a new one is uploaded
         if ($request->hasFile('image')) {

@@ -11,10 +11,12 @@ use Mail,Hash,File,DB,Helper,Auth;
 use App\Models\Cart;
 use App\Models\Product;
 use App\Models\GenarateQuotation;
+use App\Models\CustomizeOrder;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Filesystem\Filesystem;
 use App\Models\SplashScreen;
 
+use Illuminate\Support\Str;
 use Barryvdh\DomPDF\Facade\Pdf;
 
 
@@ -24,7 +26,17 @@ use Barryvdh\DomPDF\Facade\Pdf;
 
 class UserController extends Controller
 {
-    
+    private function nullToBlank($array)
+    {
+        foreach ($array as $key => $value) {
+            if (is_array($value)) {
+                $array[$key] = $this->nullToBlank($value);
+            } elseif (is_null($value)) {
+                $array[$key] = "";
+            }
+        }
+        return $array;
+    }
     public function addToCart(Request $request)
     {
         $user = auth()->user();
@@ -200,6 +212,87 @@ class UserController extends Controller
             'message' => 'Quotation generated successfully.',
             'pdf_url' => $pdfUrl,
         ]);
+    }
+
+    public function genarateQuotationDetail($id)
+    {
+        $authUser = auth()->user();
+
+        $quotation = GenarateQuotation::with([
+                'user:id,full_name,email',
+                'item'
+            ])
+            ->where('user_id', $authUser->id)
+            ->where('id', $id)
+            ->first();
+
+        if (!$quotation) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Quotation not found.'
+            ], 404);
+        }
+
+        // 🔹 Convert null values to empty string
+        $data = $quotation->toArray();
+        $data = $this->nullToBlank($data);
+
+        return response()->json([
+            'status' => true,
+            'data' => $data
+        ], 200);
+    }
+
+    public function customizeOrders(Request $request)
+    {
+        $user = auth()->user();
+
+        // Validate input
+        $validator = Validator::make($request->all(), [
+            'date' => 'required|string',
+            'remark' => 'nullable|string',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => false,
+                'message' => $validator->errors()->first(),
+            ], 200);
+        }
+
+        $customizeOrder = new CustomizeOrder();
+        $customizeOrder->customerId = $user->id;
+        $customizeOrder->date = $request->date;
+        $customizeOrder->remark = $request->remark;
+
+        if ($request->hasFile('image')) {
+
+            $image = $request->file('image');
+            $filename = Str::uuid() . '.' . $image->getClientOriginalExtension();
+
+            // Destination path
+            $destinationPath = public_path('uploads/customize_orders');
+
+            // Create directory if not exists
+            if (!file_exists($destinationPath)) {
+                mkdir($destinationPath, 0755, true);
+            }
+
+            // Move file to public/uploads/customize_orders
+            $image->move($destinationPath, $filename);
+
+            // Save URL in database
+            $customizeOrder->image = asset('uploads/customize_orders/' . $filename);
+        }
+
+        $customizeOrder->save();
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Customize order created successfully.',
+            'data' => $customizeOrder
+        ], 200);
     }
 
 

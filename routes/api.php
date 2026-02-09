@@ -75,5 +75,7 @@ Route::middleware('jwt.verify')->group(function() {
     Route::get('/cart', [UserController::class, 'getCart']);
     Route::post('/remove-cart', [UserController::class, 'removeCart']);
     Route::post('/genarate-quotation', [UserController::class, 'genarateQuotation']);
+    Route::get('/genarate-quotation/{id}', [UserController::class, 'genarateQuotationDetail']);
+    Route::post('/customize-orders', [UserController::class, 'customizeOrders']);
     
 });

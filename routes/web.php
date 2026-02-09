@@ -13,7 +13,7 @@ use App\Http\Controllers\Admin\{
     OrderController,
     NotificationController,
     BannerController,
-    CustomizeOrdersController
+    CustomizeordersController
 };
 
 /*

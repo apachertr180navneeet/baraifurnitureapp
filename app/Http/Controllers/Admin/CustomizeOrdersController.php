@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Exception;
 
-class CustomizeOrdersController extends Controller
+class CustomizeordersController extends Controller
 {
     /**
      * Show customize orders page
