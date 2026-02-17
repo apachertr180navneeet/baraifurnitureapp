@@ -74,8 +74,8 @@ class UserController extends Controller
 
         if ($cartItem) {
             // Update quantity and amount
-            $cartItem->quantity += $quantity;
-            $cartItem->amount += $amount; // total amount
+            $cartItem->quantity = $quantity;
+            $cartItem->amount = $amount; // total amount
             $cartItem->save();
         } else {
             // Add new item to cart
