@@ -250,6 +250,7 @@ class UserController extends Controller
         // Validate input
         $validator = Validator::make($request->all(), [
             'date' => 'required|string',
+            'name' => 'required|string',
             'remark' => 'nullable|string',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
@@ -263,6 +264,7 @@ class UserController extends Controller
 
         $customizeOrder = new CustomizeOrder();
         $customizeOrder->customerId = $user->id;
+        $customizeOrder->coustomername = $request->name;
         $customizeOrder->date = $request->date;
         $customizeOrder->remark = $request->remark;
 

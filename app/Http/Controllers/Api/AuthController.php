@@ -217,6 +217,7 @@ class AuthController extends Controller
             $app_user->phone        = $request->phone;
             $app_user->country_code = $request->country_code;
             $app_user->address      = $request->address;
+            $app_user->city         = $request->city;
             $app_user->password = $request->full_name;
 
             $app_user->save();

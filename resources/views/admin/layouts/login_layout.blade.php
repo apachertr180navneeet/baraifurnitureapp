@@ -2,7 +2,7 @@
 <html lang="en" ng-app="{{ config('app.name') }}">
     <head>
         <meta charset="utf-8" />
-        <title>bara ifurniture app - Admin</title>
+        <title>Barai Furniture app - Admin</title>
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <meta content="" />
         <meta name="csrf-token" content="{{ csrf_token() }}" />

@@ -19,6 +19,7 @@ class CustomizeOrder extends Model
         'remark',
         'image',
         'status',
+        'coustomername'
     ];
 
     protected $dates = ['deleted_at', 'date'];

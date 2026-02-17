@@ -11,11 +11,11 @@
                     <a href="index.html" class="app-brand-link gap-2">
                         <span class="app-brand-logo demo">
                         </span>
-                        <span class="app-brand-text demo text-body fw-bolder">bara ifurniture app</span>
+                        <span class="app-brand-text demo text-body fw-bolder">Barai Furniture app</span>
                     </a>
                 </div>
                 <!-- /Logo -->
-                <h4 class="mb-2">Welcome to bara ifurniture app! 👋</h4>
+                <h4 class="mb-2">Welcome to Barai Furniture app! 👋</h4>
                 <p class="mb-4">Please sign-in to your admin account</p>
                 <form action="{{ route('admin.login.post') }}" id="" class="mb-3" method="POST">
                     @csrf
