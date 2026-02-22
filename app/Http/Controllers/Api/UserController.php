@@ -167,19 +167,34 @@ class UserController extends Controller
         }
 
         $quotationRows = [];
+        $quotationDetails = [];
         $totalAmount = 0;
 
         foreach ($cartItems as $cart) {
             $amount = $cart->quantity * $cart->item->price;
             $totalAmount += $amount;
 
-            $quotationRows[] = GenarateQuotation::create([
+            $quotation = GenarateQuotation::create([
                 'user_id' => $user->id,
                 'item_id' => $cart->item_id,
                 'quantity' => $cart->quantity,
                 'status' => 1,
                 'amount' => $amount,
             ]);
+
+            $quotationRows[] = $quotation;
+
+            $quotationDetails[] = [
+                'quotation_id' => $quotation->id,
+                'item_id' => $cart->item_id,
+                'item_name' => $cart->item->name ?? '',
+                'item_code' => $cart->item->code ?? '',
+                'item_image' => $cart->item->image ?? '',
+                'item_price' => $cart->item->price ?? 0,
+                'quantity' => $cart->quantity,
+                'amount' => $amount,
+                'pdf_url' => '',
+            ];
         }
 
         // Generate PDF
@@ -207,10 +222,25 @@ class UserController extends Controller
             $row->save();
         }
 
+        foreach ($quotationDetails as &$detail) {
+            $detail['pdf_url'] = $pdfUrl;
+        }
+        unset($detail);
+
+        // Clear all cart items for the user
+        Cart::where('user_id', $user->id)->forceDelete();
+
         return response()->json([
             'status' => true,
             'message' => 'Quotation generated successfully.',
             'pdf_url' => $pdfUrl,
+            'total_amount' => $totalAmount,
+            'user_detail' => [
+                'name' => $user->full_name ?? '',
+                'email' => $user->email ?? '',
+                'phone' => $user->phone ?? '',
+            ],
+            'quotation_details' => $quotationDetails,
         ]);
     }
 
