@@ -63,21 +63,27 @@
     </style>
 </head>
 <body>
+    @php
+        $pdfItems = collect($quotationItems ?? [])->map(function ($row) {
+            return (object) $row;
+        });
+    @endphp
+
     <div class="header">
         <h2>{{ $user->full_name ?? '' }}</h2>
         <p>{{ $user->phone ?? '' }} | {{ $user->email ?? '' }} | {{ $user->city ?? '' }}</p>
         <div class="line"></div>
     </div>
 
-    @foreach($quotationRows as $row)
+    @foreach($pdfItems as $row)
         <div class="item">
-            <img src="{{ $row->item->image }}" width="100" height="80" alt="{{ $row->item->name }}">
+            <img src="{{ $row->item_image ?? '' }}" width="100" height="80" alt="{{ $row->item_name ?? '' }}">
             <div class="item-details">
-                <h4>{{ $row->item->name }}</h4>
-                <p>Color: {{ $row->item->color ?? '-' }}</p>
-                <p>Qty: {{ $row->quantity }}</p>
+                <h4>{{ $row->item_name ?? '' }}</h4>
+                <p>Code: {{ $row->item_code ?? '-' }}</p>
+                <p>Qty: {{ $row->quantity ?? 0 }}</p>
             </div>
-            <div class="item-amount">Rs. {{ number_format($row->amount, 2) }}/-</div>
+            <div class="item-amount">Rs. {{ number_format((float) ($row->amount ?? 0), 2) }}/-</div>
         </div>
     @endforeach
 

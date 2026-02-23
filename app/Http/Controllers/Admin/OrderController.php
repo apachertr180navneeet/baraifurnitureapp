@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Order;
+use App\Models\GenarateQuotation;
+use App\Models\Product;
 use Exception;
 
 class OrderController extends Controller
@@ -23,7 +25,27 @@ class OrderController extends Controller
     public function getall(Request $request)
     {
         try {
-            $orders = Order::with(['product', 'customer'])->orderBy('id', 'desc')->get();
+            $orders = GenarateQuotation::with(['customer'])->orderBy('id', 'desc')->get();
+
+            $orders->transform(function ($order) {
+                $itemIds = collect(explode(',', (string) $order->item_id))
+                    ->map(function ($id) {
+                        return (int) trim($id);
+                    })
+                    ->filter()
+                    ->values();
+
+                $productNames = Product::whereIn('id', $itemIds->all())
+                    ->pluck('name')
+                    ->filter()
+                    ->values()
+                    ->implode(', ');
+
+                $order->product_names = $productNames;
+
+                return $order;
+            });
+
             return response()->json(['data' => $orders], 200);
         } catch (Exception $e) {
             return response()->json([

@@ -166,27 +166,20 @@ class UserController extends Controller
             ]);
         }
 
-        $quotationRows = [];
+        $itemIds = [];
+        $quantities = 0;
         $quotationDetails = [];
         $totalAmount = 0;
 
         foreach ($cartItems as $cart) {
             $amount = $cart->quantity * $cart->item->price;
             $totalAmount += $amount;
-
-            $quotation = GenarateQuotation::create([
-                'user_id' => $user->id,
-                'item_id' => $cart->item_id,
-                'quantity' => $cart->quantity,
-                'status' => 1,
-                'amount' => $amount,
-            ]);
-
-            $quotationRows[] = $quotation;
+            $itemIds[] = $cart->item_id;
+            $quantities += $cart->quantity;
 
             $quotationDetails[] = [
-                'quotation_id' => $quotation->id,
-                'item_id' => $cart->item_id,
+                'quotation_id' => null,
+                'item_id' => (string) $cart->item_id,
                 'item_name' => $cart->item->name ?? '',
                 'item_code' => $cart->item->code ?? '',
                 'item_image' => $cart->item->image ?? '',
@@ -197,10 +190,18 @@ class UserController extends Controller
             ];
         }
 
+        $quotation = GenarateQuotation::create([
+            'user_id' => $user->id,
+            'item_id' => implode(',', $itemIds),
+            'quantity' => $quantities,
+            'status' => 1,
+            'amount' => $totalAmount,
+        ]);
+
         // Generate PDF
         $pdf = PDF::loadView('quotations.pdf', [
             'user' => $user,
-            'quotationRows' => $quotationRows,
+            'quotationItems' => $quotationDetails,
             'totalAmount' => $totalAmount,
         ]);
 
@@ -215,14 +216,13 @@ class UserController extends Controller
         $fileFullPath = $uploadPath . $fileName;
         $pdf->save($fileFullPath);
 
-        // Save PDF URL in each row
+        // Save PDF URL in quotation row
         $pdfUrl = url('uploads/quotations/' . $fileName);
-        foreach ($quotationRows as $row) {
-            $row->pdf_url = $pdfUrl;
-            $row->save();
-        }
+        $quotation->pdf_url = $pdfUrl;
+        $quotation->save();
 
         foreach ($quotationDetails as &$detail) {
+            $detail['quotation_id'] = $quotation->id;
             $detail['pdf_url'] = $pdfUrl;
         }
         unset($detail);
@@ -250,7 +250,6 @@ class UserController extends Controller
 
         $quotation = GenarateQuotation::with([
                 'user:id,full_name,email',
-                'item'
             ])
             ->where('user_id', $authUser->id)
             ->where('id', $id)
@@ -263,8 +262,55 @@ class UserController extends Controller
             ], 404);
         }
 
-        // 🔹 Convert null values to empty string
-        $data = $quotation->toArray();
+        $itemIds = collect(explode(',', (string) $quotation->item_id))
+            ->map(function ($id) {
+                return (int) trim($id);
+            })
+            ->filter()
+            ->values();
+
+        $quantities = collect(explode(',', (string) $quotation->quantity))
+            ->map(function ($qty) {
+                return (int) trim($qty);
+            })
+            ->values();
+
+        $products = Product::whereIn('id', $itemIds->all())
+            ->get()
+            ->keyBy('id');
+
+        $items = [];
+        $totalAmount = 0;
+
+        foreach ($itemIds as $index => $itemId) {
+            $product = $products->get($itemId);
+            $qty = $quantities->get($index, 1);
+            if ($qty < 1) {
+                $qty = 1;
+            }
+
+            $price = (float) ($product->price ?? 0);
+            $amount = $qty * $price;
+            $totalAmount += $amount;
+
+            $items[] = [
+                'item_id' => $itemId,
+                'quantity' => $qty,
+                'amount' => $amount,
+                'item' => $product,
+            ];
+        }
+
+        $data = [
+            'quotation_id' => $quotation->id,
+            'item_ids' => (string) $quotation->item_id,
+            'quantities' => (string) $quotation->quantity,
+            'pdf_url' => $quotation->pdf_url,
+            'user' => $quotation->user,
+            'total_amount' => $totalAmount,
+            'items' => $items,
+        ];
+
         $data = $this->nullToBlank($data);
 
         return response()->json([

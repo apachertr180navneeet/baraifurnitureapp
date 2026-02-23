@@ -14,16 +14,27 @@ use Exception;
 class ProductController extends Controller
 {
     // Show products index page
-    public function index()
+    public function index(Request $request)
     {
         $categories = Category::where('status', 'active')->orderBy('id', 'desc')->get();
-        return view('admin.products.index', compact('categories'));
+        $stockFilter = $request->get('stock');
+        if (!in_array($stockFilter, ['out_of_stock'], true)) {
+            $stockFilter = null;
+        }
+
+        return view('admin.products.index', compact('categories', 'stockFilter'));
     }
 
     // Fetch all products
-    public function getall()
+    public function getall(Request $request)
     {
-        $products = Product::with('category', 'colors')->orderBy('id', 'desc')->get();
+        $query = Product::with('category', 'colors')->orderBy('id', 'desc');
+
+        if ($request->get('stock') === 'out_of_stock') {
+            $query->where('stock', '<=', 0);
+        }
+
+        $products = $query->get();
         return response()->json(['data' => $products], 200);
     }
 

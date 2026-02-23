@@ -177,7 +177,7 @@ class CustomerController extends Controller
             ], 404);
         }
 
-        $customer->update($request->only(['full_name', 'email', 'phone', 'address']));
+        $customer->update($request->only(['full_name', 'email', 'phone', 'city']));
 
         return response()->json([
             'success' => true,

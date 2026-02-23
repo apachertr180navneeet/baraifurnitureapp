@@ -6,6 +6,12 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\User;
+use App\Models\Category;
+use App\Models\Product;
+use App\Models\Order;
+use App\Models\GenarateQuotation;
+use App\Models\Banner;
+use App\Models\CustomizeOrder;
 use Carbon\Carbon;
 use Illuminate\Support\Str;
 use Mail, DB, Hash, Validator, Session, File,Exception;
@@ -269,7 +275,34 @@ class AdminAuthController extends Controller
 
     public function adminDashboard()
     {
-        return view("admin.dashboard.index");
+        $dashboardCounts = [
+            'category' => [
+                'total' => Category::count(),
+                'active' => Category::where('status', 'active')->count(),
+                'inactive' => Category::where('status', 'inactive')->count(),
+            ],
+            'product' => [
+                'total' => Product::count(),
+                'active' => Product::where('status', 'active')->count(),
+                'inactive' => Product::where('status', 'inactive')->count(),
+            ],
+            'out_of_stock_products' => Product::where('stock', '<=', 0)->count(),
+            'order' => [
+                'total' => GenarateQuotation::count(),
+            ],
+            'banner' => [
+                'total' => Banner::count(),
+                'active' => Banner::where('status', 'active')->count(),
+                'inactive' => Banner::where('status', 'inactive')->count(),
+            ],
+            'customize_order' => [
+                'total' => CustomizeOrder::count(),
+                'pending' => CustomizeOrder::where('status', 'pending')->count(),
+                'complete' => CustomizeOrder::whereIn('status', ['completed', 'complete'])->count(),
+            ],
+        ];
+
+        return view("admin.dashboard.index", compact('dashboardCounts'));
     }
 
 

@@ -24,6 +24,13 @@
 
             </h5>
 
+            @if($stockFilter === 'out_of_stock')
+                <div class="mb-2">
+                    <span class="badge bg-label-danger">Out of Stock Filter Applied</span>
+                    <a href="{{ route('admin.product.index') }}" class="btn btn-sm btn-outline-secondary ms-2">Clear Filter</a>
+                </div>
+            @endif
+
         </div>
 
         <div class="col-md-6 text-end">
@@ -354,6 +361,11 @@
 
 $(document).ready(function() {
 
+    const stockFilter = @json($stockFilter);
+    const productAjaxUrl = new URL('{{ route("admin.product.getall") }}', window.location.origin);
+    if (stockFilter === 'out_of_stock') {
+        productAjaxUrl.searchParams.set('stock', 'out_of_stock');
+    }
 
 
     // DataTable
@@ -362,7 +374,7 @@ $(document).ready(function() {
 
         processing: true,
 
-        ajax: '{{ route("admin.product.getall") }}',
+        ajax: productAjaxUrl.toString(),
 
         columns: [
 

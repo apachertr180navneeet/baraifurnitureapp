@@ -25,4 +25,17 @@ class GenarateQuotation extends Model
         return $this->belongsTo(User::class, 'user_id');
     }
 
+
+    // Relation to Product
+    public function product()
+    {
+        return $this->belongsTo(Product::class , 'item_id');
+    }
+
+    // Relation to User (customer)
+    public function customer()
+    {
+        return $this->belongsTo(User::class, 'user_id');
+    }
+
 }
