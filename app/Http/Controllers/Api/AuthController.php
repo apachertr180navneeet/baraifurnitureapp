@@ -194,6 +194,7 @@ class AuthController extends Controller
             'phone'        => 'required|numeric|digits_between:4,12|unique:users',
             'address'      => 'required|string',
             'country_code' => 'required|max:5',
+            'device_token' => 'required',
         ]);
 
         if ($validator->fails()) {
@@ -218,6 +219,7 @@ class AuthController extends Controller
             $app_user->country_code = $request->country_code;
             $app_user->address      = $request->address;
             $app_user->city         = $request->city;
+            $app_user->device_token = $request->device_token;
             $app_user->password = $request->full_name;
 
             $app_user->save();
@@ -261,6 +263,7 @@ class AuthController extends Controller
         $validator = Validator::make($data, [
             'phone' => "required|numeric|exists:app_users,phone|unique:users,phone",
             'otp' => "required|max:4",
+            'device_token' => 'required',
         ]);
         if($validator->fails()) {
             return response()->json([
@@ -313,6 +316,7 @@ class AuthController extends Controller
             $user->bio = $app_user->bio ?? '';
             $user->phone_verified_at = $date;
             $user->avatar = $app_user->avatar;
+            $app_user->device_token = $request->device_token;
             $user->role = 'user';
             $user->status = 'active';
             $user->save();

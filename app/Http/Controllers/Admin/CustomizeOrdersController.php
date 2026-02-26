@@ -5,8 +5,11 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\CustomizeOrder;
+use App\Models\User;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Exception;
 
@@ -130,6 +133,20 @@ class CustomizeOrdersController extends Controller
             $order->status = $request->status;
             $order->save();
 
+            $user = User::find($order->customerId);
+            if ($user && !empty($user->device_token)) {
+                $this->sendPushNotification(
+                    $user->device_token,
+                    'Order Status Updated',
+                    "Your custom order #{$order->orderId} is now {$order->status}.",
+                    [
+                        'order_id' => (string) $order->id,
+                        'order_status' => (string) $order->status,
+                        'type' => 'customize_order_status',
+                    ]
+                );
+            }
+
             return response()->json([
                 'success' => true,
                 'message' => 'Order status updated successfully',
@@ -140,6 +157,47 @@ class CustomizeOrdersController extends Controller
                 'success' => false,
                 'message' => $e->getMessage(),
             ], 500);
+        }
+    }
+
+    private function sendPushNotification(string $deviceToken, string $title, string $body, array $data = []): bool
+    {
+        $serverKey = env('FCM_SERVER_KEY');
+
+        if (empty($serverKey)) {
+            Log::warning('FCM push skipped because FCM_SERVER_KEY is missing.');
+            return false;
+        }
+
+        $payload = [
+            'to' => $deviceToken,
+            'notification' => [
+                'title' => $title,
+                'body' => $body,
+                'sound' => 'default',
+            ],
+            'data' => $data,
+            'priority' => 'high',
+        ];
+
+        try {
+            $response = Http::withHeaders([
+                'Authorization' => 'key=' . $serverKey,
+                'Content-Type' => 'application/json',
+            ])->post('https://fcm.googleapis.com/fcm/send', $payload);
+
+            if (!$response->successful()) {
+                Log::error('FCM push failed', [
+                    'status' => $response->status(),
+                    'response' => $response->body(),
+                ]);
+                return false;
+            }
+
+            return true;
+        } catch (Exception $e) {
+            Log::error('FCM push exception', ['message' => $e->getMessage()]);
+            return false;
         }
     }
 }

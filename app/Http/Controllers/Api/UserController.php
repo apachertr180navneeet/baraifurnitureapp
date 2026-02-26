@@ -167,7 +167,7 @@ class UserController extends Controller
         }
 
         $itemIds = [];
-        $quantities = 0;
+        $quantities = [];
         $quotationDetails = [];
         $totalAmount = 0;
 
@@ -175,7 +175,7 @@ class UserController extends Controller
             $amount = $cart->quantity * $cart->item->price;
             $totalAmount += $amount;
             $itemIds[] = $cart->item_id;
-            $quantities += $cart->quantity;
+            $quantities[] = $cart->quantity;
 
             $quotationDetails[] = [
                 'quotation_id' => null,
@@ -193,7 +193,7 @@ class UserController extends Controller
         $quotation = GenarateQuotation::create([
             'user_id' => $user->id,
             'item_id' => implode(',', $itemIds),
-            'quantity' => $quantities,
+            'quantity' => implode(',', $quantities),
             'status' => 1,
             'amount' => $totalAmount,
         ]);
