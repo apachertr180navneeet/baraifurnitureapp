@@ -203,6 +203,10 @@ class UserController extends Controller
             'user' => $user,
             'quotationItems' => $quotationDetails,
             'totalAmount' => $totalAmount,
+        ])
+        ->setOptions([
+            'isRemoteEnabled' => true,
+            'isHtml5ParserEnabled' => true
         ]);
 
         $fileName = 'quotation_'.$user->id.'_'.time().'.pdf';

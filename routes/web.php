@@ -30,6 +30,10 @@ use App\Http\Controllers\Admin\{
 
 Route::get('/', [HomeController::class, 'index'])->name('/');
 Route::get('/home', [HomeController::class, 'index'])->name('home');
+Route::get('/privacy-policy', [HomeController::class, 'privacy'])->name('privacy.policy');
+
+Route::get('/delete-user', [HomeController::class, 'deleteUser'])->name('delete.user');
+Route::delete('/user/delete-by-mobile', [HomeController::class, 'deleteByMobile'])->name('user.delete.by.mobile');
 
 Route::name('admin.')->prefix('admin')->group(function () {
     Route::get('/', [AdminAuthController::class, 'index']);

@@ -194,7 +194,7 @@ class AuthController extends Controller
             'phone'        => 'required|numeric|digits_between:4,12|unique:users',
             'address'      => 'required|string',
             'country_code' => 'required|max:5',
-            'device_token' => 'required',
+            'device_token' => 'nullable',
         ]);
 
         if ($validator->fails()) {
@@ -263,7 +263,7 @@ class AuthController extends Controller
         $validator = Validator::make($data, [
             'phone' => "required|numeric|exists:app_users,phone|unique:users,phone",
             'otp' => "required|max:4",
-            'device_token' => 'required',
+            'device_token' => 'nullable',
         ]);
         if($validator->fails()) {
             return response()->json([

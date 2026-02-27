@@ -6,90 +6,174 @@
     <style>
         body {
             font-family: Arial, sans-serif;
-            font-size: 14px;
+            font-size: 13px;
             color: #333;
         }
-        .header {
-            margin-bottom: 20px;
-        }
-        .header h2 {
-            margin: 0;
-        }
-        .header p {
-            margin: 2px 0;
-        }
-        .line {
-            border-bottom: 1px solid #ccc;
+
+        .text-right { text-align: right; }
+        .text-center { text-align: center; }
+
+        .section {
+            width: 100%;
             margin-bottom: 15px;
         }
-        .item {
-            display: flex;
-            margin-bottom: 15px;
-            align-items: center;
-        }
-        .item img {
-            width: 100px;
-            height: 80px;
-            object-fit: cover;
-            margin-right: 15px;
+
+        .box {
             border: 1px solid #ccc;
+            padding: 10px;
+            min-height: 80px;
         }
-        .item-details {
-            flex: 1;
+
+        .row {
+            width: 100%;
+            display: table;
         }
-        .item-details h4 {
-            margin: 0 0 5px 0;
+
+        .col-4 {
+            width: 33.33%;
+            display: table-cell;
+            vertical-align: top;
         }
-        .item-details p {
-            margin: 0;
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
         }
-        .item-amount {
-            font-weight: bold;
-            text-align: right;
-            min-width: 80px;
+
+        table th, table td {
+            border: 1px solid #999;
+            padding: 6px;
+            font-size: 12px;
         }
+
+        table th {
+            background: #f2f2f2;
+        }
+
         .totals {
-            margin-top: 20px;
-            text-align: right;
+            width: 40%;
+            float: right;
+            margin-top: 10px;
         }
-        .totals p {
-            margin: 2px 0;
-            font-size: 15px;
+
+        .totals td {
+            border: none;
+            padding: 4px;
         }
-        .totals .grand-total {
-            font-size: 16px;
-            font-weight: bold;
+
+        .bank-section, .terms-section {
+            margin-top: 30px;
+        }
+
+        .footer-clear {
+            clear: both;
         }
     </style>
 </head>
 <body>
-    @php
-        $pdfItems = collect($quotationItems ?? [])->map(function ($row) {
-            return (object) $row;
-        });
-    @endphp
 
-    <div class="header">
-        <h2>{{ $user->full_name ?? '' }}</h2>
-        <p>{{ $user->phone ?? '' }} | {{ $user->email ?? '' }} | {{ $user->city ?? '' }}</p>
-        <div class="line"></div>
-    </div>
+    <h2 class="text-center">QUOTATION</h2>
 
-    @foreach($pdfItems as $row)
-        <div class="item">
-            <img src="{{ $row->item_image ?? '' }}" width="100" height="80" alt="{{ $row->item_name ?? '' }}">
-            <div class="item-details">
-                <h4>{{ $row->item_name ?? '' }}</h4>
-                <p>Code: {{ $row->item_code ?? '-' }}</p>
-                <p>Qty: {{ $row->quantity ?? 0 }}</p>
+    <!-- Header Section -->
+    <div class="section row">
+        <!-- Company Details -->
+        <div class="col-4">
+            <div class="box">
+                <strong>Company Details</strong><br>
+                ABC Corporation Pvt. Ltd.<br>
+                Ajmer, Rajasthan<br>
+                Phone: 9876543210<br>
+                Email: info@abccompany.com
             </div>
-            <div class="item-amount">Rs. {{ number_format((float) ($row->amount ?? 0), 2) }}/-</div>
         </div>
-    @endforeach
 
-    <div class="totals">
-        <p>Sub Total: Rs. {{ number_format($totalAmount, 2) }}</p>
-        <p>Grand Total: <span class="grand-total">Rs. {{ number_format($totalAmount, 2) }}</span></p>
+        <!-- Logo -->
+        <div class="col-4 text-center">
+            <div class="box">
+                <img src="{{ public_path('logo.png') }}" width="100" height="80">
+            </div>
+        </div>
+
+        <!-- Party Details -->
+        <div class="col-4">
+            <div class="box">
+                <strong>Party Details</strong><br>
+                {{ $customer->name ?? 'Client Name' }}<br>
+                {{ $customer->address ?? 'Client Address' }}<br>
+                Phone: {{ $customer->phone ?? '9999999999' }}
+            </div>
+        </div>
     </div>
+
+    <!-- Item Table -->
+    <table>
+        <thead>
+            <tr>
+                <th width="5%">Sr No</th>
+                <th width="25%">Product Name</th>
+                <th width="15%">Image</th>
+                <th width="10%">Qty</th>
+                <th width="15%">Price</th>
+                <th width="15%">Amount</th>
+            </tr>
+        </thead>
+        <tbody>
+            @php $sr = 1; @endphp
+            @foreach($quotationItems as $row)
+            <tr>
+                <td class="text-center">{{ $sr++ }}</td>
+                <td>{{ $row['item_name'] }}</td>
+                <td class="text-center">
+                    <img src="{{ $row['item_image'] }}" width="50" height="40">
+                </td>
+                <td class="text-center">{{ $row['quantity'] }}</td>
+                <td class="text-right"> {{ number_format($row['item_price'],2) }}</td>
+                <td class="text-right"> {{ number_format($row['amount'],2) }}</td>
+            </tr>
+            @endforeach
+        </tbody>
+    </table>
+
+    <!-- Totals -->
+    <table class="totals">
+        <tr>
+            <td><strong>Sub Total:</strong></td>
+            <td class="text-right"> {{ number_format($totalAmount,2) }}</td>
+        </tr>
+        <tr>
+            <td><strong>GST (18%):</strong></td>
+            <td class="text-right"> {{ number_format($totalAmount * 0.18,2) }}</td>
+        </tr>
+        <tr>
+            <td><strong>Grand Total:</strong></td>
+            <td class="text-right"><strong> {{ number_format($totalAmount * 1.18,2) }}</strong></td>
+        </tr>
+    </table>
+
+    <div class="footer-clear"></div>
+
+    <!-- Bank Details -->
+    <div class="bank-section">
+        <div class="box">
+            <strong>Bank Details</strong><br><br>
+            Bank Name: State Bank of India<br>
+            Account Name: ABC Corporation Pvt. Ltd.<br>
+            Account Number: 123456789012<br>
+            IFSC Code: SBIN0001234<br>
+            Branch: Ajmer Main Branch
+        </div>
+    </div>
+
+    <!-- Terms & Conditions -->
+    <div class="terms-section">
+        <div class="box">
+            <strong>Terms & Conditions</strong><br><br>
+            1. Goods once sold will not be taken back.<br>
+            2. Payment should be made within 7 days.<br>
+            3. Subject to Ajmer jurisdiction.
+        </div>
+    </div>
+
 </body>
 </html>
