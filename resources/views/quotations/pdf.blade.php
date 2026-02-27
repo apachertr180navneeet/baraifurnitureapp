@@ -91,7 +91,7 @@
         <!-- Logo -->
         <div class="col-4 text-center">
             <div class="box">
-                <img src="{{ public_path('logo.png') }}" width="100" height="80">
+                <img src="https://barailife.com/barai-logo.jpg" width="100" height="80">
             </div>
         </div>
 
@@ -99,9 +99,9 @@
         <div class="col-4">
             <div class="box">
                 <strong>Party Details</strong><br>
-                {{ $customer->name ?? 'Client Name' }}<br>
-                {{ $customer->address ?? 'Client Address' }}<br>
-                Phone: {{ $customer->phone ?? '9999999999' }}
+                {{ $user->full_name ?? 'Client Name' }}<br>
+                {{ $user->address ?? 'Client Address' }}<br>
+                Phone: {{ $user->phone ?? '9999999999' }}
             </div>
         </div>
     </div>
@@ -159,9 +159,9 @@
             <strong>Bank Details</strong><br><br>
             Bank Name: State Bank of India<br>
             Account Name: ABC Corporation Pvt. Ltd.<br>
-            Account Number: 123456789012<br>
-            IFSC Code: SBIN0001234<br>
-            Branch: Ajmer Main Branch
+            Account Number: 41784105483<br>
+            IFSC Code: SBIN00031375<br>
+            Branch: Bhagat Ki kothi, Jodhpur
         </div>
     </div>
 
