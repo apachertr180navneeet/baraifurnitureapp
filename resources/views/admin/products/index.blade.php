@@ -173,14 +173,28 @@
 
                         </div>
 
-                        <div class="col-md-4">
+                    </div>
 
-                            <label for="image" class="form-label">Image</label>
+                    <div class="row mb-3">
 
+                        <div class="col-md-3">
+                            <label class="form-label">Image 1</label>
                             <input type="file" id="image" class="form-control">
+                        </div>
 
-                            <small class="error-text text-danger"></small>
+                        <div class="col-md-3">
+                            <label class="form-label">Image 2</label>
+                            <input type="file" id="image2" class="form-control">
+                        </div>
 
+                        <div class="col-md-3">
+                            <label class="form-label">Image 3</label>
+                            <input type="file" id="image3" class="form-control">
+                        </div>
+
+                        <div class="col-md-3">
+                            <label class="form-label">Image 4</label>
+                            <input type="file" id="image4" class="form-control">
                         </div>
 
                     </div>
@@ -303,14 +317,28 @@
 
                         </div>
 
-                        <div class="col-md-4">
+                    </div>
 
-                            <label for="editimage" class="form-label">Image</label>
+                    <div class="row mb-3">
 
+                        <div class="col-md-3">
+                            <label class="form-label">Image 1</label>
                             <input type="file" id="editimage" class="form-control">
+                        </div>
 
-                            <small class="error-text text-danger"></small>
+                        <div class="col-md-3">
+                            <label class="form-label">Image 2</label>
+                            <input type="file" id="editimage2" class="form-control">
+                        </div>
 
+                        <div class="col-md-3">
+                            <label class="form-label">Image 3</label>
+                            <input type="file" id="editimage3" class="form-control">
+                        </div>
+
+                        <div class="col-md-3">
+                            <label class="form-label">Image 4</label>
+                            <input type="file" id="editimage4" class="form-control">
                         </div>
 
                     </div>
@@ -498,7 +526,18 @@ $(document).ready(function() {
 
         formData.append('description', $('#description').val());
 
-        if($('#image')[0].files.length>0) formData.append('image', $('#image')[0].files[0]);
+        if($('#image')[0].files.length > 0)
+            formData.append('image', $('#image')[0].files[0]);
+
+        if($('#image2')[0].files.length > 0)
+            formData.append('image2', $('#image2')[0].files[0]);
+
+        if($('#image3')[0].files.length > 0)
+            formData.append('image3', $('#image3')[0].files[0]);
+
+        if($('#image4')[0].files.length > 0)
+            formData.append('image4', $('#image4')[0].files[0]);
+
 
         $('#colorContainer .color-row').each(function(index){
 
@@ -646,7 +685,17 @@ $(document).ready(function() {
 
         formData.append('description', $('#editdescription').val());
 
-        if($('#editimage')[0].files.length>0) formData.append('image', $('#editimage')[0].files[0]);
+        if($('#editimage')[0].files.length > 0)
+            formData.append('image', $('#editimage')[0].files[0]);
+
+        if($('#editimage2')[0].files.length > 0)
+            formData.append('image2', $('#editimage2')[0].files[0]);
+
+        if($('#editimage3')[0].files.length > 0)
+            formData.append('image3', $('#editimage3')[0].files[0]);
+
+        if($('#editimage4')[0].files.length > 0)
+            formData.append('image4', $('#editimage4')[0].files[0]);
 
         $('#editColorContainer .color-row').each(function(index){
 

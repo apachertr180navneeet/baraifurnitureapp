@@ -46,8 +46,13 @@ class ProductController extends Controller
             'category_id' => 'required|exists:categories,id',
             'price' => 'required|numeric',
             'stock' => 'required|integer',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif',
             'description' => 'nullable|string|max:1000',
+
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif',
+            'image2' => 'nullable|image|mimes:jpeg,png,jpg,gif',
+            'image3' => 'nullable|image|mimes:jpeg,png,jpg,gif',
+            'image4' => 'nullable|image|mimes:jpeg,png,jpg,gif',
+
             'colors' => 'nullable|array',
             'colors.*.color_name' => 'required_with:colors|string|max:255',
             'colors.*.qty' => 'required_with:colors|integer|min:0',
@@ -62,28 +67,33 @@ class ProductController extends Controller
             ], 422);
         }
 
-        $imageUrl = null;
+        $data = $request->only(['name','category_id','price','stock','description']);
 
-        // Handle image upload
-        if ($request->hasFile('image')) {
-            $imageName = time() . '_' . $request->file('image')->getClientOriginalName();
-            $request->file('image')->move(public_path('uploads/product'), $imageName);
-            $imageUrl = url('uploads/product/' . $imageName);
+        $images = ['image','image2','image3','image4'];
+
+        foreach ($images as $img) {
+
+            if ($request->hasFile($img)) {
+
+                $imageName = time().'_'.$request->file($img)->getClientOriginalName();
+                $request->file($img)->move(public_path('uploads/product'), $imageName);
+
+                $data[$img] = url('uploads/product/'.$imageName);
+
+            } else {
+
+                $data[$img] = null;
+            }
         }
 
-        $product = Product::create([
-            'name' => $request->name,
-            'category_id' => $request->category_id,
-            'price' => $request->price,
-            'stock' => $request->stock,
-            'description' => $request->description,
-            'image' => $imageUrl, // save full URL directly
-        ]);
+        $product = Product::create($data);
 
-        // Add colors
         if ($request->has('colors')) {
+
             foreach ($request->colors as $color) {
+
                 $product->colors()->create($color);
+
             }
         }
 
@@ -117,13 +127,19 @@ class ProductController extends Controller
             'price' => 'required|numeric',
             'stock' => 'required|integer',
             'description' => 'nullable|string|max:1000',
+
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif',
+            'image2' => 'nullable|image|mimes:jpeg,png,jpg,gif',
+            'image3' => 'nullable|image|mimes:jpeg,png,jpg,gif',
+            'image4' => 'nullable|image|mimes:jpeg,png,jpg,gif',
+
             'colors' => 'nullable|array',
             'colors.*.color_name' => 'required_with:colors|string|max:255',
             'colors.*.qty' => 'required_with:colors|integer|min:0',
         ];
 
         $validator = Validator::make($request->all(), $rules);
+
         if ($validator->fails()) {
             return response()->json([
                 'success' => false,
@@ -132,36 +148,48 @@ class ProductController extends Controller
         }
 
         $product = Product::find($request->id);
+
         if (!$product) {
+
             return response()->json([
                 'success' => false,
                 'message' => 'Product not found'
             ], 404);
         }
 
-        // Prepare data to update
-        $data = $request->only(['name', 'category_id', 'price', 'stock','description']);
+        $data = $request->only(['name','category_id','price','stock','description']);
 
-        // Update image if a new one is uploaded
-        if ($request->hasFile('image')) {
-            // Delete old image if exists
-            $oldImagePath = str_replace(url('/') . '/', '', $product->image);
-            if (file_exists(public_path($oldImagePath))) {
-                unlink(public_path($oldImagePath));
+        $images = ['image','image2','image3','image4'];
+
+        foreach ($images as $img) {
+
+            if ($request->hasFile($img)) {
+
+                if ($product->$img) {
+
+                    $oldImage = str_replace(url('/').'/', '', $product->$img);
+
+                    if (file_exists(public_path($oldImage))) {
+
+                        unlink(public_path($oldImage));
+                    }
+                }
+
+                $imageName = time().'_'.$request->file($img)->getClientOriginalName();
+                $request->file($img)->move(public_path('uploads/product'), $imageName);
+
+                $data[$img] = url('uploads/product/'.$imageName);
             }
-
-            $imageName = time() . '_' . $request->file('image')->getClientOriginalName();
-            $request->file('image')->move(public_path('uploads/product'), $imageName);
-            $data['image'] = url('uploads/product/' . $imageName);
         }
 
-        // Update product
         $product->update($data);
 
-        // Update colors
         if ($request->has('colors')) {
+
             $product->colors()->delete();
+
             foreach ($request->colors as $color) {
+
                 $product->colors()->create($color);
             }
         }

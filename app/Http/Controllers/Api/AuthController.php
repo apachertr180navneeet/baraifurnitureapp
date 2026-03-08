@@ -201,6 +201,8 @@ class AuthController extends Controller
             'address'      => 'required|string',
             'country_code' => 'required|max:5',
             'device_token' => 'nullable',
+            'gst_number'   => 'nullable',
+            'pincode'      =>  'required' 
         ]);
 
         if ($validator->fails()) {
@@ -227,6 +229,8 @@ class AuthController extends Controller
             $app_user->city         = $request->city;
             $app_user->device_token = $request->device_token;
             $app_user->password = $request->full_name;
+            $app_user->gst_number = $request->gst_number;
+            $app_user->zipcode = $request->pincode;
 
             $app_user->save();
 
@@ -315,6 +319,7 @@ class AuthController extends Controller
             $user->country = $app_user->country ?? '';
             $user->country_code = $app_user->country_code;
             $user->zipcode = $app_user->zipcode ?? '';
+            $user->gst_number = $app_user->gst_number ?? '';
             $user->latitude = $app_user->latitude ?? '';
             $user->longitude = $app_user->longitude ?? '';
             $user->device_type = $app_user->device_type ?? '';
@@ -479,8 +484,24 @@ class AuthController extends Controller
     }
 
     
-    public function getUserDetail($user_id){
-        $user = User::where('id',$user_id)->first();
+    public function getUserDetail($user_id)
+    {
+        $user = User::find($user_id);
+
+        if (!$user) {
+            return response()->json([
+                'status' => false,
+                'message'   => "User not found",
+            ], 200);
+        }
+
+        if ($user->status != 'active') {
+            return response()->json([
+                'status' => false,
+                'message'   => "user is inactive",
+            ], 200);
+        }
+
         return $user;
     }
 
@@ -531,8 +552,7 @@ class AuthController extends Controller
             }
         }
 
-        // Get active categories
-        $categories = Category::where('status', 'active')->get();
+        $categories = Category::where('status', 'active')->limit(5)->get();
 
         // Get active items with category and colors
         $items = Product::with('category', 'colors')->where('status', 'active')->get()->map(function($item) {
@@ -657,7 +677,10 @@ class AuthController extends Controller
             'price'         => $product->price,
             'stock'         => $product->stock,
             'description'   => $product->description ?? "",
-            'image'         => $product->image,
+            'image'         => $product->image ?? "",
+            'image2'         => $product->image2 ?? "",
+            'image3'         => $product->image3 ?? "",
+            'image4'         => $product->image4 ?? "",
             'status'        => $product->status,
             'created_at'    => $product->created_at,
             'updated_at'    => $product->updated_at,

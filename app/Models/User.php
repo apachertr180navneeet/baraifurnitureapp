@@ -38,6 +38,7 @@ class User extends Authenticatable implements JWTSubject
         'country',
         'country_code',
         'zipcode',
+        'gst_number',
         'latitude',
         'longitude',
         'timezone',
