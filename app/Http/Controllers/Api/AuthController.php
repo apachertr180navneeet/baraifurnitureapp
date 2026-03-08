@@ -90,6 +90,7 @@ class AuthController extends Controller
             'phone' => 'required|digits_between:4,13',
             'country_code' => "required|max:5",
             'otp' => "required|max:4",
+            'device_token' => 'nullable',
         ]);
 
         if($validator->fails()) {
@@ -166,6 +167,11 @@ class AuthController extends Controller
                 ],200);
             }
 
+
+            if(!empty($data['device_token'])){
+                $user->device_token = $data['device_token'];
+            }
+
             // Save device info
             $user->save();
 
@@ -190,7 +196,7 @@ class AuthController extends Controller
         // Validate required fields
         $validator = Validator::make($request->all(), [
             'full_name'    => 'required|string',
-            'email'        => 'required|email|unique:users',
+            'email'        => 'nullable|email|unique:users',
             'phone'        => 'required|numeric|digits_between:4,12|unique:users',
             'address'      => 'required|string',
             'country_code' => 'required|max:5',
@@ -312,11 +318,10 @@ class AuthController extends Controller
             $user->latitude = $app_user->latitude ?? '';
             $user->longitude = $app_user->longitude ?? '';
             $user->device_type = $app_user->device_type ?? '';
-            $user->device_token = $app_user->device_token ?? '';
+            $user->device_token = $app_user->device_token ?? $request->device_token;
             $user->bio = $app_user->bio ?? '';
             $user->phone_verified_at = $date;
             $user->avatar = $app_user->avatar;
-            $app_user->device_token = $request->device_token;
             $user->role = 'user';
             $user->status = 'active';
             $user->save();

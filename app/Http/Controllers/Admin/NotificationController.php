@@ -4,9 +4,12 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use App\Models\Notification;
+use App\Models\Notification as NotificationModel;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
+use Kreait\Firebase\Factory;
+use Kreait\Firebase\Messaging\CloudMessage;
+use Kreait\Firebase\Messaging\Notification;
 use Exception;
 
 class NotificationController extends Controller
@@ -24,7 +27,7 @@ class NotificationController extends Controller
      */
     public function getall(Request $request)
     {
-        $customers = Notification::orderBy('id', 'desc')
+        $customers = NotificationModel::orderBy('id', 'desc')
             ->get();
 
         return response()->json(['data' => $customers], 200);
@@ -36,7 +39,7 @@ class NotificationController extends Controller
     public function status(Request $request)
     {
         try {
-            $notification = Notification::find($request->id);
+            $notification = NotificationModel::find($request->id);
 
             if (!$notification) {
                 return response()->json([
@@ -67,7 +70,7 @@ class NotificationController extends Controller
     public function destroy($id)
     {
         try {
-            $customer = Notification::find($id);
+            $customer = NotificationModel::find($id);
 
             if (!$customer) {
                 return response()->json([
@@ -111,11 +114,14 @@ class NotificationController extends Controller
             ], 422); // Unprocessable Entity
         }
 
-        $notification = Notification::create([
+        $notification = NotificationModel::create([
             'date'        => $request->date,
             'title'       => $request->title,
             'description' => $request->description,
         ]);
+
+        // 🔥 Send Firebase Notification
+        $this->sendToAllUsers($request->title, $request->description);
 
         return response()->json([
             'success' => true,
@@ -129,7 +135,7 @@ class NotificationController extends Controller
      */
     public function get($id)
     {
-        $notification = Notification::find($id);
+        $notification = NotificationModel::find($id);
 
         if (!$notification) {
             return response()->json([
@@ -162,7 +168,7 @@ class NotificationController extends Controller
             ], 422);
         }
 
-        $notification = Notification::find($request->id);
+        $notification = NotificationModel::find($request->id);
 
         if (!$notification) {
             return response()->json([
@@ -173,10 +179,42 @@ class NotificationController extends Controller
 
         $notification->update($request->only(['date', 'title', 'description']));
 
+        // 🔥 Send Firebase Notification
+        $this->sendToAllUsers($request->title, $request->description);
+
         return response()->json([
             'success' => true,
             'message' => 'Notification updated successfully!',
             'data'    => $notification,
         ], 200);
+    }
+
+
+    public function sendToAllUsers($title, $description)
+    {
+        $factory = (new Factory)
+            ->withServiceAccount(env('FIREBASE_CREDENTIALS'));
+
+        $messaging = $factory->createMessaging();
+
+        $tokens = \App\Models\User::whereNotNull('device_token')
+                    ->pluck('device_token')
+                    ->toArray();
+
+        dd($tokens);
+
+        if (empty($tokens)) {
+            return false;
+        }
+
+        $message = CloudMessage::new()
+            ->withNotification(NotificationModel::create($title, $description))
+            ->withData([
+                'click_action' => 'FLUTTER_NOTIFICATION_CLICK'
+            ]);
+
+        $messaging->sendMulticast($message, $tokens);
+
+        return true;
     }
 }

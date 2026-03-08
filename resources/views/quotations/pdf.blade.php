@@ -69,6 +69,11 @@
         .footer-clear {
             clear: both;
         }
+
+        .red-text{
+            color: red;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
@@ -81,10 +86,10 @@
         <div class="col-4">
             <div class="box">
                 <strong>Company Details</strong><br>
-                ABC Corporation Pvt. Ltd.<br>
-                Ajmer, Rajasthan<br>
-                Phone: 9876543210<br>
-                Email: info@abccompany.com
+                BARAI FURNITURE (08LQVPS6339A1Z2)<br>
+                PLOT NO 3 KHASRA  NO 124/1 GOKUL DHAM SALAWAS JODHPUR 342802 RAJASTHAN<br>
+                Phone: 7611980545 / 6375835409 <br>
+                Email: baraifurnitureofficial@gmail.com
             </div>
         </div>
 
@@ -158,7 +163,6 @@
         <div class="box">
             <strong>Bank Details</strong><br><br>
             Bank Name: State Bank of India<br>
-            Account Name: ABC Corporation Pvt. Ltd.<br>
             Account Number: 41784105483<br>
             IFSC Code: SBIN00031375<br>
             Branch: Bhagat Ki kothi, Jodhpur
@@ -169,9 +173,20 @@
     <div class="terms-section">
         <div class="box">
             <strong>Terms & Conditions</strong><br><br>
-            1. Goods once sold will not be taken back.<br>
-            2. Payment should be made within 7 days.<br>
-            3. Subject to Ajmer jurisdiction.
+
+            1. 50% payment must be made in advance and the remaining payment must be made before the order is dispatched.<br>
+
+            2. Transportation charges will be extra, and we are not responsible for any delays in transportation.<br>
+
+            <span style="color:red;">
+            3. Your order will be dispatched within 7 days of receiving full payment.
+            </span><br>
+
+            4. Your order will be processed one day after we receive your advance payment.<br>
+
+            <span style="color:red;">
+            5. 10% discount on orders delayed after 7 days.
+            </span>
         </div>
     </div>
 
