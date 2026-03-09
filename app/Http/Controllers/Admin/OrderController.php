@@ -61,7 +61,7 @@ class OrderController extends Controller
     public function status(Request $request)
     {
         try {
-            $order = Order::find($request->id);
+            $order = GenarateQuotation::find($request->id);
 
             if (!$order) {
                 return response()->json([

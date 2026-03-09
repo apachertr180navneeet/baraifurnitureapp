@@ -276,29 +276,51 @@ class AdminAuthController extends Controller
     public function adminDashboard()
     {
         $dashboardCounts = [
+
+            // Category Counts
             'category' => [
                 'total' => Category::count(),
                 'active' => Category::where('status', 'active')->count(),
                 'inactive' => Category::where('status', 'inactive')->count(),
             ],
+
+            // Product Counts
             'product' => [
                 'total' => Product::count(),
                 'active' => Product::where('status', 'active')->count(),
                 'inactive' => Product::where('status', 'inactive')->count(),
             ],
+
+            // Customer Counts
+            'customer' => [
+                'total' => User::count(),
+                'active' => User::where('status', 'active')->count(),
+                'inactive' => User::where('status', 'inactive')->count(),
+            ],
+
+            // Out Of Stock Products
             'out_of_stock_products' => Product::where('stock', '<=', 0)->count(),
+
+            // Order Counts
             'order' => [
                 'total' => GenarateQuotation::count(),
+                'pending' => GenarateQuotation::where('status', 'pending')->count(),
+                'complete' => GenarateQuotation::whereIn('status', ['completed','complete'])->count(),
+                'cancelled' => GenarateQuotation::where('status', 'cancelled')->count(),
             ],
+
+            // Banner Counts
             'banner' => [
                 'total' => Banner::count(),
                 'active' => Banner::where('status', 'active')->count(),
                 'inactive' => Banner::where('status', 'inactive')->count(),
             ],
+
+            // Customize Order Counts
             'customize_order' => [
                 'total' => CustomizeOrder::count(),
                 'pending' => CustomizeOrder::where('status', 'pending')->count(),
-                'complete' => CustomizeOrder::whereIn('status', ['completed', 'complete'])->count(),
+                'complete' => CustomizeOrder::whereIn('status', ['completed','complete'])->count(),
             ],
         ];
 

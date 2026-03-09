@@ -63,8 +63,28 @@
         <div class="col-md-6 col-xl-4 mb-4">
             <div class="card dashboard-card">
                 <div class="card-body">
-                    <h6>Order</h6>
-                    <div class="dashboard-stat"><span>Total</span><strong>{{ $dashboardCounts['order']['total'] }}</strong></div>
+                    <h6>Orders</h6>
+
+                    <div class="dashboard-stat">
+                        <span>Total</span>
+                        <strong>{{ $dashboardCounts['order']['total'] }}</strong>
+                    </div>
+
+                    <div class="dashboard-stat">
+                        <span>Pending</span>
+                        <strong>{{ $dashboardCounts['order']['pending'] }}</strong>
+                    </div>
+
+                    <div class="dashboard-stat">
+                        <span>Complete</span>
+                        <strong>{{ $dashboardCounts['order']['complete'] }}</strong>
+                    </div>
+
+                    <div class="dashboard-stat mb-0">
+                        <span>Cancelled</span>
+                        <strong>{{ $dashboardCounts['order']['cancelled'] }}</strong>
+                    </div>
+
                 </div>
             </div>
         </div>
@@ -87,6 +107,25 @@
                     <div class="dashboard-stat"><span>Total</span><strong>{{ $dashboardCounts['customize_order']['total'] }}</strong></div>
                     <div class="dashboard-stat"><span>Pending</span><strong>{{ $dashboardCounts['customize_order']['pending'] }}</strong></div>
                     <div class="dashboard-stat mb-0"><span>Complete</span><strong>{{ $dashboardCounts['customize_order']['complete'] }}</strong></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 col-xl-4 mb-4">
+            <div class="card dashboard-card">
+                <div class="card-body">
+                    <h6>Customers</h6>
+                    <div class="dashboard-stat">
+                        <span>Total</span>
+                        <strong>{{ $dashboardCounts['customer']['total'] }}</strong>
+                    </div>
+                    <div class="dashboard-stat">
+                        <span>Active</span>
+                        <strong>{{ $dashboardCounts['customer']['active'] }}</strong>
+                    </div>
+                    <div class="dashboard-stat mb-0">
+                        <span>In-active</span>
+                        <strong>{{ $dashboardCounts['customer']['inactive'] }}</strong>
+                    </div>
                 </div>
             </div>
         </div>

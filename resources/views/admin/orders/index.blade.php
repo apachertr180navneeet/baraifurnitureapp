@@ -57,6 +57,8 @@
                                     <th>Customer</th>
 
                                     <th>Price</th>
+                                    
+                                    <th>Status</th>
 
                                     <th>Action</th>
 
@@ -88,13 +90,12 @@
 
 <script>
 
+let table; // make global
+
 $(document).ready(function() {
 
-
-
     // DataTable
-
-    const table = $('#orderTable').DataTable({
+    table = $('#orderTable').DataTable({
 
         processing: true,
 
@@ -110,9 +111,11 @@ $(document).ready(function() {
                     if (!data) return '';
                     const date = new Date(data);
                     if (Number.isNaN(date.getTime())) return data;
+
                     const dd = String(date.getDate()).padStart(2, '0');
                     const mm = String(date.getMonth() + 1).padStart(2, '0');
                     const yyyy = date.getFullYear();
+
                     return `${dd}/${mm}/${yyyy}`;
                 }
             },
@@ -124,22 +127,84 @@ $(document).ready(function() {
             { data: 'amount' },
 
             {
+                data: "status",
+                render: function(data){
 
-                data: null,
-
-                render: (data, type, row) => {
-                    if (!row.pdf_url) {
-                        return `<span class="text-muted">No PDF</span>`;
+                    if(data === "pending"){
+                        return '<span class="badge bg-label-warning">Pending</span>';
                     }
 
-                    const pdfUrl = row.pdf_url.startsWith('http')
-                        ? row.pdf_url
-                        : `{{ url('/') }}/${row.pdf_url.replace(/^\/+/, '')}`;
+                    if(data === "completed"){
+                        return '<span class="badge bg-label-success">Completed</span>';
+                    }
 
-                    return `<a href="${pdfUrl}" target="_blank" class="btn btn-sm btn-primary">View PDF</a>`;
+                    if(data === "cancelled"){
+                        return '<span class="badge bg-label-danger">Cancelled</span>';
+                    }
 
+                    return data;
                 }
+            },
 
+            {
+                data: null,
+                render: (data, type, row) => {
+
+                    let pdfBtn = '';
+                    let statusBtn = '';
+
+                    // PDF Button
+                    if (row.pdf_url) {
+
+                        const pdfUrl = row.pdf_url.startsWith('http')
+                            ? row.pdf_url
+                            : `{{ url('/') }}/${row.pdf_url.replace(/^\/+/, '')}`;
+
+                        pdfBtn = `<a href="${pdfUrl}" target="_blank" class="btn btn-sm btn-primary me-1">View PDF</a>`;
+
+                    } else {
+
+                        pdfBtn = `<span class="text-muted me-1">No PDF</span>`;
+                    }
+
+                    // Status Buttons
+
+                    if(row.status === 'pending'){
+
+                        statusBtn = `
+                        <button class="btn btn-sm btn-success me-1"
+                        onclick="updateOrderStatus(${row.id}, 'completed')">
+                        Complete
+                        </button>
+
+                        <button class="btn btn-sm btn-danger"
+                        onclick="updateOrderStatus(${row.id}, 'cancelled')">
+                        Cancel
+                        </button>
+                        `;
+
+                    }
+                    else if(row.status === 'completed'){
+
+                        statusBtn = `
+                        <button class="btn btn-sm btn-warning"
+                        onclick="updateOrderStatus(${row.id}, 'pending')">
+                        Mark Pending
+                        </button>
+                        `;
+                    }
+                    else if(row.status === 'cancelled'){
+
+                        statusBtn = `
+                        <button class="btn btn-sm btn-warning"
+                        onclick="updateOrderStatus(${row.id}, 'pending')">
+                        Reopen
+                        </button>
+                        `;
+                    }
+
+                    return pdfBtn + statusBtn;
+                }
             }
 
         ],
@@ -147,6 +212,66 @@ $(document).ready(function() {
     });
 
 });
+
+</script>
+
+
+<script>
+
+// Update Status
+
+function updateOrderStatus(id, status){
+
+    const message =
+        status === 'pending'
+        ? "Order will be pending."
+        : status === 'completed'
+        ? "Order will be completed."
+        : "Order will be cancelled.";
+
+    Swal.fire({
+
+        title: "Are you sure?",
+        text: message,
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonText: "Yes"
+
+    }).then(result => {
+
+        if(result.isConfirmed){
+
+            $.post('{{ route("admin.order.status") }}',
+            {
+                id: id,
+                status: status,
+                _token: '{{ csrf_token() }}'
+            },
+            function(response){
+
+                if(response.success){
+
+                    Swal.fire("Success", response.message, "success");
+
+                    table.ajax.reload();
+
+                }else{
+
+                    Swal.fire("Error", response.message || "Failed to update status.","error");
+
+                }
+
+            }).fail(function(){
+
+                Swal.fire("Error","Request failed.","error");
+
+            });
+
+        }
+
+    });
+
+}
 
 </script>
 

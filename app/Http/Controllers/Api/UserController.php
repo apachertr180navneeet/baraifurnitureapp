@@ -332,7 +332,7 @@ class UserController extends Controller
             'date' => 'required|string',
             'name' => 'required|string',
             'remark' => 'nullable|string',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'image.*' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
         if ($validator->fails()) {
@@ -348,12 +348,11 @@ class UserController extends Controller
         $customizeOrder->date = $request->date;
         $customizeOrder->remark = $request->remark;
 
+        $images = [];
+
+        // Check multiple images
         if ($request->hasFile('image')) {
 
-            $image = $request->file('image');
-            $filename = Str::uuid() . '.' . $image->getClientOriginalExtension();
-
-            // Destination path
             $destinationPath = public_path('uploads/customize_orders');
 
             // Create directory if not exists
@@ -361,14 +360,22 @@ class UserController extends Controller
                 mkdir($destinationPath, 0755, true);
             }
 
-            // Move file to public/uploads/customize_orders
-            $image->move($destinationPath, $filename);
+            foreach ($request->file('image') as $image) {
 
-            // Save URL in database
-            $customizeOrder->image = asset('uploads/customize_orders/' . $filename);
+                $filename = Str::uuid() . '.' . $image->getClientOriginalExtension();
+
+                $image->move($destinationPath, $filename);
+
+                $images[] = asset('uploads/customize_orders/' . $filename);
+            }
         }
 
+        // Save images as JSON
+        $customizeOrder->image = json_encode($images);
+
         $customizeOrder->save();
+
+        $customizeOrder->image = json_decode($customizeOrder->image);
 
         return response()->json([
             'status' => true,
