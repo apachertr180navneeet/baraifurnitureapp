@@ -201,14 +201,12 @@ class NotificationController extends Controller
                     ->pluck('device_token')
                     ->toArray();
 
-        dd($tokens);
-
         if (empty($tokens)) {
             return false;
         }
 
         $message = CloudMessage::new()
-            ->withNotification(NotificationModel::create($title, $description))
+            ->withNotification(Notification::create($title, $description))
             ->withData([
                 'click_action' => 'FLUTTER_NOTIFICATION_CLICK'
             ]);
