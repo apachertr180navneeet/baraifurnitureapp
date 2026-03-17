@@ -50,7 +50,7 @@
 
                                     <th>Remark</th>
 
-                                    <th>Image</th>
+                                    {{--  <th>Image</th>  --}}
 
                                     <th>Status</th>
 
@@ -186,14 +186,6 @@ $(document).ready(function() {
 
             { data: "remark" },
 
-            { 
-
-                data: "image",
-
-                render: (data) => data ? `<img src="${data}" class="img-thumbnail" width="100">` : ''
-
-            },
-
             {
 
                 data: "status",
@@ -220,7 +212,15 @@ $(document).ready(function() {
 
                     const editBtn = `<button class="btn btn-sm btn-warning me-1" onclick="editOrder(${row.id})">Edit</button>`;
 
-                    return `${statusBtn}${editBtn}`;
+                    const pdfBtn = `
+                        <a href="{{ url('/admin/customizeorders/pdf') }}/${row.id}" 
+                        target="_blank"
+                        class="btn btn-sm btn-primary">
+                        PDF
+                        </a>
+                        `;
+
+                    return `${statusBtn}${editBtn}${pdfBtn}`;
 
                 }
 

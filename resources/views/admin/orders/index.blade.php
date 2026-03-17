@@ -3,13 +3,10 @@
 @section('style')
 
 <style>
-
-    .badge-status { cursor: pointer; }
-
+.badge-status { cursor: pointer; }
 </style>
 
 @endsection
-
 
 
 @section('content')
@@ -17,53 +14,56 @@
 <div class="container-fluid flex-grow-1 container-p-y">
 
     <div class="row">
-
         <div class="col-md-6 text-start">
-
             <h5 class="py-2 mb-2">
-
                 <span class="text-primary fw-light">Orders</span>
-
             </h5>
-
         </div>
-
     </div>
 
 
-
     <div class="row">
-
         <div class="col-xl-12 col-lg-12">
 
             <div class="card">
 
                 <div class="card-body">
 
+                    <!-- FILTER SECTION -->
+                    <div class="row mb-3">
+
+                        <div class="col-md-3">
+                            <label>Start Date</label>
+                            <input type="date" id="start_date" class="form-control">
+                        </div>
+
+                        <div class="col-md-3">
+                            <label>End Date</label>
+                            <input type="date" id="end_date" class="form-control">
+                        </div>
+
+                        <div class="col-md-3 d-flex align-items-end">
+                            <button class="btn btn-primary me-2" id="filterBtn">Filter</button>
+                            <button class="btn btn-secondary" id="resetBtn">Reset</button>
+                        </div>
+
+                    </div>
+
+
                     <div class="table-responsive text-nowrap">
 
                         <table class="table table-bordered" id="orderTable">
 
                             <thead>
-
                                 <tr>
-
                                     <th>ID</th>
-
                                     <th>Order Date</th>
-
                                     <th>Product</th>
-
                                     <th>Customer</th>
-
                                     <th>Price</th>
-                                    
                                     <th>Status</th>
-
                                     <th>Action</th>
-
                                 </tr>
-
                             </thead>
 
                             <tbody></tbody>
@@ -77,7 +77,6 @@
             </div>
 
         </div>
-
     </div>
 
 </div>
@@ -90,16 +89,23 @@
 
 <script>
 
-let table; // make global
+let table;
 
 $(document).ready(function() {
 
-    // DataTable
     table = $('#orderTable').DataTable({
 
         processing: true,
 
-        ajax: '{{ route("admin.order.getall") }}',
+        ajax: {
+            url: '{{ route("admin.order.getall") }}',
+            data: function(d){
+
+                d.start_date = $('#start_date').val();
+                d.end_date   = $('#end_date').val();
+
+            }
+        },
 
         columns: [
 
@@ -108,8 +114,11 @@ $(document).ready(function() {
             {
                 data: 'created_at',
                 render: (data) => {
+
                     if (!data) return '';
+
                     const date = new Date(data);
+
                     if (Number.isNaN(date.getTime())) return data;
 
                     const dd = String(date.getDate()).padStart(2, '0');
@@ -211,15 +220,34 @@ $(document).ready(function() {
 
     });
 
+
+    // Filter Button
+    $('#filterBtn').click(function(){
+
+        table.ajax.reload();
+
+    });
+
+
+    // Reset Button
+    $('#resetBtn').click(function(){
+
+        $('#start_date').val('');
+        $('#end_date').val('');
+
+        table.ajax.reload();
+
+    });
+
 });
 
 </script>
 
 
+
 <script>
 
 // Update Status
-
 function updateOrderStatus(id, status){
 
     const message =
@@ -276,4 +304,3 @@ function updateOrderStatus(id, status){
 </script>
 
 @endsection
-

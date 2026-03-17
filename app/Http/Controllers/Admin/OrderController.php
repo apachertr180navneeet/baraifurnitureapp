@@ -25,9 +25,37 @@ class OrderController extends Controller
     public function getall(Request $request)
     {
         try {
-            $orders = GenarateQuotation::with(['customer'])->orderBy('id', 'desc')->get();
+
+            $query = GenarateQuotation::with(['customer']);
+
+            // Date filter
+            if ($request->start_date && $request->end_date) {
+
+                $query->whereBetween('created_at', [
+                    $request->start_date . ' 00:00:00',
+                    $request->end_date . ' 23:59:59'
+                ]);
+
+            }
+
+            // If only start date
+            if ($request->start_date && !$request->end_date) {
+
+                $query->whereDate('created_at', '>=', $request->start_date);
+
+            }
+
+            // If only end date
+            if (!$request->start_date && $request->end_date) {
+
+                $query->whereDate('created_at', '<=', $request->end_date);
+
+            }
+
+            $orders = $query->orderBy('id', 'desc')->get();
 
             $orders->transform(function ($order) {
+
                 $itemIds = collect(explode(',', (string) $order->item_id))
                     ->map(function ($id) {
                         return (int) trim($id);
@@ -46,12 +74,17 @@ class OrderController extends Controller
                 return $order;
             });
 
-            return response()->json(['data' => $orders], 200);
+            return response()->json([
+                'data' => $orders
+            ], 200);
+
         } catch (Exception $e) {
+
             return response()->json([
                 'success' => false,
                 'message' => $e->getMessage(),
             ], 500);
+
         }
     }
 

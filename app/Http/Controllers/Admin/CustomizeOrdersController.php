@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Exception;
 
 class CustomizeOrdersController extends Controller
@@ -199,5 +200,22 @@ class CustomizeOrdersController extends Controller
             Log::error('FCM push exception', ['message' => $e->getMessage()]);
             return false;
         }
+    }
+
+
+    public function generatePdf($id)
+    {
+        $order = CustomizeOrder::with('customer')->findOrFail($id);
+
+        // decode images
+        $images = [];
+
+        if ($order->image) {
+            $images = json_decode($order->image, true);
+        }
+
+        $pdf = Pdf::loadView('admin.customize_orders.pdf', compact('order','images'));
+
+        return $pdf->stream('customize-order-'.$order->id.'.pdf');
     }
 }

@@ -3,9 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Web\HomeController;
 use App\Http\Controllers\Admin\AdminAuthController;
-use App\Http\Controllers\Admin\PageController;
-use App\Http\Controllers\Admin\ContactController;
-use App\Http\Controllers\Admin\AdminUserController;
+
 use App\Http\Controllers\Admin\{
     CustomerController,
     CategoryController,
@@ -75,6 +73,7 @@ Route::name('admin.')->prefix('admin')->group(function () {
                 Route::post('update', [$controller, 'update'])->name('update');
             });
         }
+        Route::get('/customizeorders/pdf/{id}', [CustomizeordersController::class, 'generatePdf'])->name('customizeorders.pdf');
     });
 
 });
